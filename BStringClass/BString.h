@@ -1,5 +1,5 @@
 // BStringClass
-// A Simple custom String Class for C++ version 1.0.1
+// A Simple custom String Class for C++ version 1.0.2
 
 #include <iostream>
 #include <ostream>
@@ -94,30 +94,25 @@ public:
 		
 		BStringClass tmp;
 		int pi = 0;
-		int s = (len - pos);
+		int i = pos;
 
-		//Set buffer size and set aside memory
-		tmp.size = s;
-		tmp.buff = new char[s];
-		//Copy the chars from this->buff to tmp
-		for (int y = pos; y < len; y++){
-			tmp.buff[pi] = this->buff[y];
+		tmp.size = len;
+		tmp.buff = new char[tmp.size];
+
+		while (i < pos+len){
+			tmp.buff[pi] = this->buff[i];
 			pi++;
+			i++;
 		}
-		//Set end of tnp
-		tmp.buff[pi] = '\0';
-		//Return tmp
+
+		tmp.buff[len] = '\0';
 		return tmp;
 	}
 
 	void copy(char out[], unsigned int pos, unsigned int len){
-		int pi = 0;
-		//Copy chars from buff to out
-		for (int y = pos; y < len; y++){
-			out[pi] = this->buff[y];
-			pi++;
-		}
-		out[pi] = '\0';
+
+		BStringClass tmp = this->substr(pos, len);
+		strcpy(out, tmp.buff);
 	}
 
 	const unsigned char at(unsigned int pos){
@@ -162,6 +157,20 @@ public:
 		s.buff = new char[s.size + 1];
 		strncpy_s(s.buff, this->size + 1, this->buff, this->size);
 		strncpy_s(s.buff + this->size, obj.size + 1, obj.buff,obj.size);
+
+		return s;
+	}
+
+	BStringClass operator+(char *source){
+		BStringClass s;
+		unsigned int s_len;
+
+		s_len = strlen(source);
+
+		s.size = this->size + s_len;
+		s.buff = new char[s.size + 1];
+		strncpy_s(s.buff, this->size + 1, this->buff, this->size);
+		strncpy_s(s.buff + this->size, s_len + 1, source, s_len);
 
 		return s;
 	}
@@ -227,11 +236,10 @@ public:
 		buffer[y - 1] = '\0';
 
 		*this = BStringClass(buffer);
-
 		delete[]buffer;
 	}
 
-	int find(char *src){
+	unsigned int find(char *src) const{
 		//Locate a substring in buffer and return the index found at
 		//I am sure there are quicker ways of doing this but for now this works ok.
 		char c = '\0';
@@ -240,12 +248,172 @@ public:
 		int x = 0;
 		int y = 0;
 		int len = this->size;
-		char sub[1024] = { '\0' };
+		char *sub = nullptr;
 		int pi = 0;
 		int ti = 0;
 		int idx = -1;
 
 		l_pos = strlen(src);
+		sub = new char[l_pos + 1];
+
+		if (l_pos > this->size){
+			return -1;
+		}
+
+		while (x < len){
+			if (this->buff[x] == src[0]){
+				s_pos = x;
+				pi = (x + l_pos);
+				ti = 0;
+
+				for (y = x; y < pi; y++){
+					sub[ti] = this->buff[y];
+					ti++;
+				}
+				sub[ti] = '\0';
+
+				if (strcmp(sub, src) == 0){
+					if (s_pos == 0){
+						idx = 0;
+					}
+					else{
+						idx = (s_pos - 1);
+					}
+					break;
+				}
+			}
+			x++;
+		}
+
+		//Clear up
+		memset(sub, 0, sizeof sub);
+		return idx;
+	}
+
+
+	unsigned int find(BStringClass obj) const{
+		//Locate a substring in buffer and return the index found at
+		//I am sure there are quicker ways of doing this but for now this works ok.
+		char c = '\0';
+		int s_pos = 0;
+		int l_pos = 0;
+		int x = 0;
+		int y = 0;
+		int len = this->size;
+		char *sub = nullptr;
+		int pi = 0;
+		int ti = 0;
+		int idx = -1;
+
+		l_pos = strlen(obj.buff);
+		sub = new char[l_pos + 1];
+
+		if (l_pos > this->size){
+			return -1;
+		}
+
+		while (x < len){
+			if (this->buff[x] == obj.buff[0]){
+				s_pos = x;
+				pi = (x + l_pos);
+				ti = 0;
+
+				for (y = x; y < pi; y++){
+					sub[ti] = this->buff[y];
+					ti++;
+				}
+				sub[ti] = '\0';
+
+				if (strcmp(sub, obj.buff) == 0){
+					if (s_pos == 0){
+						idx = 0;
+					}
+					else{
+						idx = (s_pos - 1);
+					}
+					break;
+				}
+			}
+			x++;
+		}
+
+		//Clear up
+		memset(sub, 0, sizeof sub);
+		return idx;
+	}
+
+
+	unsigned int find(BStringClass obj, unsigned int pos) const{
+		//Locate a substring in buffer and return the index found at
+		//I am sure there are quicker ways of doing this but for now this works ok.
+		char c = '\0';
+		int s_pos = 0;
+		int l_pos = 0;
+		int x = pos;
+		int y = 0;
+		int len = this->size;
+		char *sub = nullptr;
+		int pi = 0;
+		int ti = 0;
+		int idx = -1;
+
+		l_pos = strlen(obj.buff);
+		sub = new char[l_pos + 1];
+
+		if (l_pos > this->size){
+			return -1;
+		}
+
+		while (x < len){
+			if (this->buff[x] == obj.buff[0]){
+				s_pos = x;
+				pi = (x + l_pos);
+				ti = 0;
+
+				for (y = x; y < pi; y++){
+					sub[ti] = this->buff[y];
+					ti++;
+				}
+				sub[ti] = '\0';
+
+				if (strcmp(sub, obj.buff) == 0){
+					if (s_pos == 0){
+						idx = 0;
+					}
+					else{
+						idx = (s_pos - 1);
+					}
+					break;
+				}
+			}
+			x++;
+		}
+
+		//Clear up
+		memset(sub, 0, sizeof sub);
+		return idx;
+	}
+
+	unsigned int find(char *src, unsigned int pos) const{
+		//Locate a substring in buffer and return the index found at
+		//I am sure there are quicker ways of doing this but for now this works ok.
+		char c = '\0';
+		int s_pos = 0;
+		int l_pos = 0;
+		int x = pos;
+		int y = 0;
+		int len = this->size;
+		char *sub = nullptr;
+		int pi = 0;
+		int ti = 0;
+		int idx = -1;
+
+		l_pos = strlen(src);
+		sub = new char[l_pos + 1];
+
+		if (l_pos > this->size){
+			return -1;
+		}
 
 		while (x < len){
 			if (this->buff[x] == src[0]){
@@ -300,6 +468,42 @@ public:
 		x = 0;
 		y = 0;
 		memset(buffer, 0, sizeof buffer);
+	}
+
+	bool starts_with(char* s){
+		int x = strlen(s);
+		bool flag = false;
+		char *bytes;
+
+		bytes = new char[x];
+
+		this->copy(bytes, 0, x);
+
+		if (strcmp(bytes, s) == 0){
+			flag = true;
+		}
+
+		memset(bytes, 0, sizeof bytes);
+		return flag;
+	}
+
+	bool ends_with(char* s){
+		int x = strlen(s);
+		bool flag = false;
+
+		char *bytes;
+
+		bytes = new char[x];
+
+		this->copy(bytes, this->size - x, x);
+
+		if (strcmp(bytes, s) == 0){
+			flag = true;
+		}
+
+		memset(bytes, 0, sizeof bytes);
+
+		return flag;
 	}
 
 	~BStringClass(){
